@@ -15,14 +15,14 @@ var router = express.Router();
  *         "1": ["p998pmo"],
  *         "2": ["p998cmm"]
  *     },
-       "endScore": 11
+ "endScore": 11
  * }
  *
  * responseSample: {
  *     "gameId": "5762a65f8802d648487b46ef"
  * }
  */
-router.post('/', function(req, res) {
+router.post('/', function (req, res) {
     var db = req.db;
 
     db.get('games').insert({
@@ -32,37 +32,47 @@ router.post('/', function(req, res) {
         "endScore": req.body.endScore,
         "deviceId": req.body.deviceId
 
-    }, function(err, docsInserted){
+    }, function (err, docsInserted) {
 
-	if (docsInserted) {
+        if (docsInserted) {
             res.json({"gameId": docsInserted._id});
-	} else {
-            res.status(500).json({"message":"Database error", "error":"Database error"});
+        } else {
+            res.status(500).json({"message": "Database error", "error": "Database error"});
         }
 
     });
 });
 
 /*
+ * GET /games
+ * returns all games
+ */
+router.get('/', function (req, res) {
+    var db = req.db;
+
+    db.get('games').find({}, function (err, found) {
+        res.json(found);
+    });
+});
+
+/*
  * GET /games/:id
  */
-router.get('/:id', function(req, res) {
+router.get('/:id', function (req, res) {
     var db = req.db;
 
     db.get('games').findOne({
         "_id": req.params.id
-    }, function(err, found){
+    }, function (err, found) {
 
-	if (found) {
+        if (found) {
             res.json(found);
-	} else {
-            res.status(404).json({"message":"Game not found", "error":{}});
+        } else {
+            res.status(404).json({"message": "Game not found", "error": {}});
         }
 
     });
 });
-
-
 
 
 module.exports = router;
