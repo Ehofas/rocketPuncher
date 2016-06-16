@@ -64,8 +64,8 @@ describe("Score counter", function () {
         beforeEach(function () {
             scores = {
                 teams: {
-                    "1": {score: 10},
-                    "2": {score: 10}
+                    "1": {score: 9},
+                    "2": {score: 9}
                 }
             }
         });
@@ -76,9 +76,24 @@ describe("Score counter", function () {
             game.status = "ABORTED";
             expect(scoreCounter.getGameStatus(game, scores)).toBe("ABORTED");
         });
-        it("should return ended if score is met", function () {
+        it("should return ended if score is met and more than 2 points lead", function () {
             scores.teams[1].score = 11;
             expect(scoreCounter.getGameStatus(game, scores)).toBe("ENDED");
+        });
+        it("should not end if score is met and less than 2 points lead", function () {
+            scores.teams[1].score = 11;
+            scores.teams[2].score = 10;
+            expect(scoreCounter.getGameStatus(game, scores)).toBe("ACTIVE");
+        });
+        it("should not end if way over score but no 2 points lead", function () {
+            scores.teams[1].score = 15;
+            scores.teams[2].score = 14;
+            expect(scoreCounter.getGameStatus(game, scores)).toBe("ACTIVE");
+        });
+        it("should not end if way over score but no 2 points lead", function () {
+            scores.teams[1].score = 14;
+            scores.teams[2].score = 15;
+            expect(scoreCounter.getGameStatus(game, scores)).toBe("ACTIVE");
         });
     });
 

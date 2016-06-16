@@ -17,11 +17,18 @@ function getGameStatus (game, scores){
     if(game.status != "ACTIVE"){
         return game.status;
     }
-    for(var team in scores.teams){
-        if(scores.teams[team].score >= game.endScore){
-            return "ENDED";
+    var scoreMet = false;
+    var scoreLeadMet = false;
+    var teams = scores.teams;
+    for(var team in teams){
+        if(teams[team].score >= game.endScore){
+            scoreMet = true;
         }
     }
+    if(Math.abs(teams[1].score - teams[2].score) >= 2)
+        scoreLeadMet = true;
+    if(scoreMet && scoreLeadMet)
+        return "ENDED";
     return "ACTIVE";
 }
 
