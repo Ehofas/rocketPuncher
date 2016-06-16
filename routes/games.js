@@ -87,7 +87,7 @@ router.get('/:id', function (req, res) {
 });
 
 /*
- * GET /games/abort/:id
+ * POST /games/abort/:id
  * Stop game
  */
 router.post('/abort/:id', function (req, res) {
