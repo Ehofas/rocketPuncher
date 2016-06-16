@@ -8,7 +8,7 @@ var bodyParser = require('body-parser');
 // Database
 var mongo = require('mongodb');
 var monk = require('monk');
-var db = monk('192.168.20.90:27017/rocket-puncher');
+var db = monk('192.168.1.74:27017/rocket-puncher');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
