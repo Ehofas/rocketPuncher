@@ -20,17 +20,27 @@ function getScore(gameId, team) {
 router.post("/", function (req, res) {
     var db = req.db;
     var gamesCollection = db.get("games");
-    gamesCollection.find({"status": "ACTIVE", "deviceId": req.body.deviceId}, {}, function (e, games) {
+    gamesCollection.find({
+        "status": "ACTIVE",
+        "deviceId": req.body.deviceId
+    }, {}, function (e, games) {
         if (games && games.length > 0) {
             var game = games[0];
             var scoresCollection = db.get("scores");
             scoresCollection.insert(getScore(game._id, req.body.team));
-            scoresCollection.find({"gameId": game._id}, {}, function (e, scores) {
+            scoresCollection.find({
+                "gameId": game._id
+            }, {}, function (e, scores) {
                 var calculatedScore = ScoreCounter.countScores(game, scores);
                 if (ScoreCounter.getGameStatus(game, calculatedScore) == "ENDED") {
-                    gamesCollection.update(
-                        {"_id": game._id},
-                        {$set: {"status": "ENDED"}});
+                    gamesCollection.update({
+                        "_id": game._id
+                    }, {
+                        $set: {
+                            "status": "ENDED",
+                            "endDate": dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
+                        }
+                    });
                 }
                 res.json(calculatedScore);
             });

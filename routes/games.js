@@ -15,54 +15,47 @@ var router = express.Router();
  *         "1": ["p998pmo"],
  *         "2": ["p998cmm"]
  *     },
-       "endScore": 11
+ "endScore": 11
  * }
  *
  * responseSample: {
  *     "gameId": "5762a65f8802d648487b46ef"
  * }
  */
-router.post('/', function(req, res) {
+router.post('/', function (req, res) {
     var db = req.db;
 
     db.get('games').insert({
-
         "status": "ACTIVE",
         "teams": req.body.teams,
         "endScore": req.body.endScore,
-        "deviceId": req.body.deviceId
-
-    }, function(err, docsInserted){
-
-	if (docsInserted) {
+        "deviceId": req.body.deviceId,
+        "startDate": dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
+    }, function (err, docsInserted) {
+        if (docsInserted) {
             res.json({"gameId": docsInserted._id});
-	} else {
-            res.status(500).json({"message":"Database error", "error":"Database error"});
+        } else {
+            res.status(500).json({"message": "Database error", "error": "Database error"});
         }
-
     });
 });
 
 /*
  * GET /games/:id
  */
-router.get('/:id', function(req, res) {
+router.get('/:id', function (req, res) {
     var db = req.db;
 
     db.get('games').findOne({
         "_id": req.params.id
-    }, function(err, found){
-
-	if (found) {
+    }, function (err, found) {
+        if (found) {
             res.json(found);
-	} else {
-            res.status(404).json({"message":"Game not found", "error":{}});
+        } else {
+            res.status(404).json({"message": "Game not found", "error": {}});
         }
-
     });
 });
-
-
 
 
 module.exports = router;
