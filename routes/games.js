@@ -41,6 +41,18 @@ router.post('/', function (req, res) {
 });
 
 /*
+ * GET /games
+ * returns all games
+ */
+router.get('/', function (req, res) {
+    var db = req.db;
+
+    db.get('games').find({}, function (err, found) {
+        res.json(found);
+    });
+});
+
+/*
  * GET /games/:id
  */
 router.get('/:id', function (req, res) {
