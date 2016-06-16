@@ -2,6 +2,7 @@ var express = require('express');
 var dateFormat = require('dateformat');
 var router = express.Router();
 var ScoreCounter = require("./score-counter");
+var q = require("q");
 
 /*
  * POST /games
@@ -23,32 +24,58 @@ var ScoreCounter = require("./score-counter");
  *     "gameId": "5762a65f8802d648487b46ef"
  * }
  */
-
 router.post('/', function (req, res) {
     var db = req.db;
-    if(validateFields(res, req.body)) {
-        db.get('games').insert({
-            "status": "ACTIVE",
-            "teams": req.body.teams,
-            "endScore": req.body.endScore,
-            "deviceId": req.body.deviceId,
-            "startDate": dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
-        }, function (err, docsInserted) {
-            if (docsInserted) {
-                res.json({"gameId": docsInserted._id});
-            } else {
-                res.status(500).json({"message": "Database error", "error": "Database error"});
-            }
-        });
+    if (validateFields(res, req.body)) {
+        var gamesCollection = db.get('games');
+        checkActiveGames(gamesCollection, req.body.deviceId).then(function () {
+            gamesCollection.insert({
+                "status": "ACTIVE",
+                "teams": req.body.teams,
+                "endScore": req.body.endScore,
+                "deviceId": req.body.deviceId,
+                "startDate": dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
+            }, function (err, docsInserted) {
+                if (docsInserted) {
+                    res.json({"gameId": docsInserted._id});
+                } else {
+                    res.status(500).json({"message": "Database error", "error": "Database error"});
+                }
+            });
+        })
     }
 });
 
 function validateFields(res, fields) {
-    if(fields.teams == undefined){
+    if (fields.teams == undefined) {
         res.status(400).json({"message": "Field value invalid"});
         return false;
     }
     return true;
+}
+
+function checkActiveGames(gamesCollection, deviceId) {
+    var defer = q.defer();
+    gamesCollection.find({
+        "status": "ACTIVE",
+        "deviceId": deviceId
+    }, {}, function (e, games) {
+        if (games && games.length > 0) {
+            gamesCollection.update({
+                "_id": games[0]._id
+            }, {
+                $set: {
+                    "status": "ABORTED",
+                    "endDate": dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
+                }
+            }, function (e) {
+                defer.resolve(games);
+            });
+        } else {
+            defer.resolve();
+        }
+    });
+    return defer.promise;
 }
 
 /*
