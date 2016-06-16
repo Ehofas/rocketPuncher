@@ -17,6 +17,10 @@ var router = express.Router();
  *     },
        "endScore": 11
  * }
+ *
+ * responseSample: {
+ *     "gameId": "5762a65f8802d648487b46ef"
+ * }
  */
 router.post('/', function(req, res) {
     var db = req.db;
@@ -31,9 +35,9 @@ router.post('/', function(req, res) {
     }, function(err, docsInserted){
 
 	if (docsInserted) {
-            res.json({docsInserted._id});
+            res.json({"gameId": docsInserted._id});
 	} else {
-            res.json({});
+            res.status(500).json({"error":"Database error"});
         }
 
     });
