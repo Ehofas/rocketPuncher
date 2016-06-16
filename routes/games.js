@@ -29,7 +29,7 @@ router.post('/', function(req, res) {
 
         "status": "ACTIVE",
         "teams": req.body.teams,
-        "endScore": req.body.ensScore,
+        "endScore": req.body.endScore,
         "deviceId": req.body.deviceId
 
     }, function(err, docsInserted){
@@ -37,10 +37,32 @@ router.post('/', function(req, res) {
 	if (docsInserted) {
             res.json({"gameId": docsInserted._id});
 	} else {
-            res.status(500).json({"error":"Database error"});
+            res.status(500).json({"message":"Database error", "error":"Database error"});
         }
 
     });
 });
+
+/*
+ * GET /games/:id
+ */
+router.get('/:id', function(req, res) {
+    var db = req.db;
+
+    db.get('games').findOne({
+        "_id": req.params.id
+    }, function(err, found){
+
+	if (found) {
+            res.json(found);
+	} else {
+            res.status(404).json({"message":"Game not found", "error":{}});
+        }
+
+    });
+});
+
+
+
 
 module.exports = router;
