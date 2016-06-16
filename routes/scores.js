@@ -11,17 +11,15 @@ var router = express.Router();
  */
 router.post('/', function(req, res) {
     var db = req.db;
-     db.get('games').find({"status": "ACTIVE", "deviceId": req.body.deviceId},{},function(e,game) {
-        if(game.length > 0) {
-
-
-            db.get("scores").insert({
-                "gameId": game[0].gameId,
-                "team": req.team,
+     db.get('games').find({"status": "ACTIVE", "deviceId": req.body.deviceId},{},function(e,games) {
+        if(games.length > 0) {
+            var score = {
+                "gameId": games[0].id,
+                "team": req.body.team,
                 "date": dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
-            })
-
-	        res.json(game);
+            };
+            //db.get("scores").insert(score);
+	        res.json(score);
         } else {
             res.json(["empty"]);
         }
