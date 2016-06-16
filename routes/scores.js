@@ -19,15 +19,16 @@ function getScore(gameId, team) {
 }
 router.post("/", function (req, res) {
     var db = req.db;
-    db.get("games").find({"status": "ACTIVE", "deviceId": req.body.deviceId}, {}, function (e, games) {
+    var gamesCollection = db.get("games");
+    gamesCollection.find({"status": "ACTIVE", "deviceId": req.body.deviceId}, {}, function (e, games) {
         if (games && games.length > 0) {
             var game = games[0];
-            var score = getScore(game._id, req.body.team);
-            db.get("scores").insert(score);
-            db.get("scores").find({"gameId": game._id}, {}, function (e, scores) {
+            var scoresCollection = db.get("scores");
+            scoresCollection.insert(getScore(game._id, req.body.team));
+            scoresCollection.find({"gameId": game._id}, {}, function (e, scores) {
                 var calculatedScore = ScoreCounter.countScores(game, scores);
                 if (ScoreCounter.getGameStatus(game, calculatedScore) == "ENDED") {
-                    db.get("games").update(
+                    gamesCollection.update(
                         {"_id": game._id},
                         {$set: {"status": "ENDED"}});
                 }
