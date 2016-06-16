@@ -2,6 +2,7 @@ var express = require("express");
 var dateFormat = require("dateformat");
 var router = express.Router();
 var ScoreCounter = require("./score-counter");
+var mongo = require('mongodb');
 
 /*
  * POST /scores/{gameId}
@@ -48,6 +49,25 @@ router.post("/", function (req, res) {
             res.json({"message": "Game not found"});
         }
 
+    });
+});
+
+/*
+ * POST /scores/last/:gameId
+ * request: {
+ *     "gameId": "5762a65f8802d648487b46ef",
+ * }
+ */
+router.delete("/last/:gameId", function (req, res) {
+    var db = req.db;
+    var scoresCollection = db.get("scores");
+    scoresCollection.findOne({"gameId": mongo.ObjectID(req.params.gameId)}, {sort:{date:-1}}, function (e, score) {
+        if(score) {
+            scoresCollection.remove({"_id": score._id});
+            res.json({"message": "Score removed"});
+        } else {
+            res.json({"message": "Scores empty"});
+        }
     });
 });
 
