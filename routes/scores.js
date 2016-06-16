@@ -60,13 +60,22 @@ router.post("/", function (req, res) {
  */
 router.delete("/last/:gameId", function (req, res) {
     var db = req.db;
-    var scoresCollection = db.get("scores");
-    scoresCollection.findOne({"gameId": mongo.ObjectID(req.params.gameId)}, {sort:{date:-1}}, function (e, score) {
-        if(score) {
-            scoresCollection.remove({"_id": score._id});
-            res.json({"message": "Score removed"});
+    db.get("games").find({
+        "status": "ACTIVE",
+        "_id": mongo.ObjectID(req.params.gameId)
+    }, {}, function (e, games) {
+        if (games && games.length > 0) {
+            var scoresCollection = db.get("scores");
+            scoresCollection.findOne({"gameId": mongo.ObjectID(req.params.gameId)}, {sort: {date: -1}}, function (e, score) {
+                if (score) {
+                    scoresCollection.remove({"_id": score._id});
+                    res.json({"message": "Score removed"});
+                } else {
+                    res.json({"message": "Scores empty"});
+                }
+            });
         } else {
-            res.json({"message": "Scores empty"});
+            res.json({"message": "Empty"});
         }
     });
 });
