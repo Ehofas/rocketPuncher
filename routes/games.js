@@ -65,6 +65,7 @@ router.get('/', function (req, res) {
 
 /*
  * GET /games/:id
+ * Get detailed game status
  */
 router.get('/:id', function (req, res) {
     var db = req.db;
@@ -85,5 +86,23 @@ router.get('/:id', function (req, res) {
     });
 });
 
+/*
+ * GET /games/abort/:id
+ * Stop game
+ */
+router.post('/abort/:id', function (req, res) {
+    var db = req.db;
+
+    db.get('games').update({
+        "_id": req.params.id
+    }, {
+        $set: {
+            "status": "ABORTED",
+            "endDate": dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss")
+        }
+    }, function (e) {
+        res.json({"message": "Game stopped"});
+    });
+});
 
 module.exports = router;
